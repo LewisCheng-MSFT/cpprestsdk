@@ -239,7 +239,8 @@ namespace web { namespace http
                         connection->cancel();
                         // This will destroy and remove the connection from pool after the set timeout.
                         // We use 'this' because async calls to timer handler only occur while the pool exists.
-                        connection->start_pool_timer(m_timeout_secs, boost::bind(&linux_connection_pool::handle_pool_timer, this, boost::asio::placeholders::error, connection));
+                        std::weak_ptr<linux_connection> lc(connection);
+                        connection->start_pool_timer(m_timeout_secs, boost::bind(&linux_connection_pool::handle_pool_timer, this, boost::asio::placeholders::error, std::move(lc)));
 
                         put_to_pool(connection);
                     }
